@@ -1,3 +1,20 @@
+%%{init: {'theme': 'dark', 'themeVariables': {
+  'background': '#13251B',
+  'actorBkg': '#1E2B22',
+  'actorBorder': '#6FA287',
+  'actorTextColor': '#F5F2E8',
+  'actorLineColor': '#3A4A3F',
+  'signalColor': '#D7E8DA',
+  'signalTextColor': '#F5F2E8',
+  'labelBoxBkgColor': '#27512F',
+  'labelBoxBorderColor': '#6FA287',
+  'labelTextColor': '#FFFFFF',
+  'loopTextColor': '#F5F2E8',
+  'noteBkgColor': '#27512F',
+  'noteTextColor': '#F5F2E8',
+  'noteBorderColor': '#6FA287',
+  'sequenceNumberColor': '#F5F2E8'
+}}}%%
 sequenceDiagram
     participant A as Arduino (.ino)
     participant P as App Python (Flask)
@@ -9,18 +26,18 @@ sequenceDiagram
         A->>P: "Luz: 612 | Solo: 188 | Temperatura: 23.40 *C"
         P->>P: parse via regex + compute_mood()
         opt humor mudou desde a ultima leitura
-            P->>A: "MOOD:<humor>\n"
+            P->>A: "MOOD:<humor>"
             A->>A: atualizarLedsStatus()\n(verde/amarelo/vermelho)
         end
     end
 
     loop A cada 2s
         N->>P: GET /api/state
-        P-->>N: JSON { mood, luz, solo, temperatura,\ncritico, seca_restante_s, ... }
+        P-->>N: JSON mood, luz, solo,\ntemperatura, critico, ...
         N->>N: troca gif/frame, barras,\ncontadores e badges
     end
 
-    rect rgb(240, 240, 240)
+    rect rgba(255, 255, 255, 0.08)
     Note over A,N: Modo festa
     A->>A: botao pressionado (debounce 30ms)
     A->>P: ">> Tocando musica!"
@@ -30,12 +47,12 @@ sequenceDiagram
     P->>P: state.set_festa(False)
     end
 
-    rect rgb(250, 235, 235)
+    rect rgba(255, 110, 110, 0.14)
     Note over A,N: Estado critico
     P->>P: seca_since/dormindo_since/temp\nexcede limiar -> critico = True
-    P->>A: "CRITICO:1\n"
+    P->>A: "CRITICO:1"
     A->>A: liga LED porta 10 +\nbuzzer intermitente (250ms)
     P->>P: humor recalculado = Feliz/Oculos\n-> critico = False
-    P->>A: "CRITICO:0\n"
+    P->>A: "CRITICO:0"
     A->>A: desliga LED + buzzer
     end
