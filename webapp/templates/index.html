@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PetPlanta</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=17">
+</head>
+<body>
+  <header>
+    <h1>&#127807; PetPlanta</h1>
+    <div id="badges">
+      <span id="badge-conexao" class="badge offline">checando...</span>
+      <span id="badge-sim" class="badge sim hidden">modo simulacao</span>
+      <button id="btn-sim" class="icon-btn hidden" title="Simulação" aria-label="Simulação">&#127919;</button>
+      <button id="btn-config" class="icon-btn" title="Configuracoes" aria-label="Configuracoes">&#9881;&#65039;</button>
+    </div>
+  </header>
+
+  <div id="config-overlay" class="overlay hidden">
+    <div class="config-modal">
+      <div class="config-modal-header">
+        <h2>Configurações</h2>
+        <button id="btn-config-close" class="icon-btn" aria-label="Fechar">&times;</button>
+      </div>
+
+      <p class="config-modal-intro">Ajusta os limiares que definem o humor da planta e o estado crítico (alarme). As mudanças valem na hora e ficam salvas.</p>
+
+      <div id="config-error" class="config-error hidden"></div>
+
+      <form id="config-form">
+        <fieldset>
+          <legend>Limiares de humor</legend>
+
+          <label class="config-field">
+            <span>Luz - sem luz (dormindo) abaixo de</span>
+            <input type="number" id="cfg-luz-escuro-max" name="luz_escuro_max" min="0" max="1023" step="1" required>
+          </label>
+
+          <label class="config-field">
+            <span>Luz - sol forte (óculos) a partir de</span>
+            <input type="number" id="cfg-luz-ensolarado-min" name="luz_ensolarado_min" min="0" max="1023" step="1" required>
+          </label>
+
+          <label class="config-field">
+            <span>Solo - considerado seco abaixo de</span>
+            <input type="number" id="cfg-solo-seco-max" name="solo_seco_max" min="0" max="1023" step="1" required>
+          </label>
+
+          <label class="config-field">
+            <span>Solo - considera regada quando atingir</span>
+            <input type="number" id="cfg-rega-detectada-min" name="rega_detectada_min" min="0" max="1023" step="1" required>
+          </label>
+
+          <label class="config-field">
+            <span>Temperatura - com frio abaixo de (°C)</span>
+            <input type="number" id="cfg-temp-frio-max" name="temp_frio_max" min="-40" max="100" step="0.1" required>
+          </label>
+
+          <label class="config-field">
+            <span>Temperatura - doente (calor) a partir de (°C)</span>
+            <input type="number" id="cfg-temp-doente-min" name="temp_doente_min" min="-40" max="100" step="0.1" required>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Estado crítico (LED + alarme)</legend>
+
+          <label class="config-field">
+            <span>Solo seco contínuo por mais de (horas inteiras)</span>
+            <input type="number" id="cfg-critico-duracao-seca" name="critico_duracao_seca_horas" min="1" max="999" step="1" required>
+          </label>
+
+          <label class="config-field">
+            <span>Sem luz contínua por mais de (horas inteiras)</span>
+            <input type="number" id="cfg-critico-duracao-dormindo" name="critico_duracao_dormindo_horas" min="1" max="999" step="1" required>
+          </label>
+
+          <label class="config-field">
+            <span>Temperatura crítica máxima (°C)</span>
+            <input type="number" id="cfg-critico-temp-max" name="critico_temp_max" min="-40" max="150" step="0.1" required>
+          </label>
+
+          <label class="config-field">
+            <span>Temperatura crítica mínima (°C)</span>
+            <input type="number" id="cfg-critico-temp-min" name="critico_temp_min" min="-40" max="150" step="0.1" required>
+          </label>
+        </fieldset>
+
+        <div class="config-modal-actions">
+          <button type="button" id="btn-config-cancel" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" id="btn-config-save" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="sim-overlay" class="overlay hidden">
+    <div class="config-modal">
+      <div class="config-modal-header">
+        <h2>Simulação</h2>
+        <button id="btn-sim-close" class="icon-btn" aria-label="Fechar">&times;</button>
+      </div>
+
+      <p class="config-modal-intro">Sem Arduino conectado, o app gera dados fictícios. Escolha entre o passeio aleatório (padrão) ou controle os valores de luz, solo e temperatura manualmente.</p>
+
+      <div id="sim-error" class="config-error hidden"></div>
+
+      <form id="sim-form">
+        <fieldset>
+          <legend>Modo</legend>
+
+          <label class="config-field">
+            <span>Aleatório (varia sozinho)</span>
+            <input type="radio" name="sim_mode" id="sim-mode-random" value="random">
+          </label>
+
+          <label class="config-field">
+            <span>Manual (eu controlo os valores)</span>
+            <input type="radio" name="sim_mode" id="sim-mode-manual" value="manual">
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Valores manuais</legend>
+
+          <label class="config-field">
+            <span>Luz</span>
+            <input type="number" id="sim-luz" name="luz" min="0" max="1023" step="1">
+          </label>
+
+          <label class="config-field">
+            <span>Solo (umidade)</span>
+            <input type="number" id="sim-solo" name="solo" min="0" max="1023" step="1">
+          </label>
+
+          <label class="config-field">
+            <span>Temperatura (°C)</span>
+            <input type="number" id="sim-temp" name="temperatura" min="-40" max="100" step="0.1">
+          </label>
+        </fieldset>
+
+        <div class="config-modal-actions">
+          <button type="button" id="btn-sim-cancel" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" id="btn-sim-save" class="btn btn-primary">Aplicar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <main>
+    <section class="pet-card">
+      <img id="pet-gif" src="{{ url_for('static', filename='gifs/loop_feliz.gif') }}" alt="PetPlanta">
+      <div id="mood-label">Feliz</div>
+    </section>
+
+    <section class="sensors">
+      <div class="sensor-card" id="card-luz">
+        <span class="icon">&#9728;&#65039;</span>
+        <span class="label">Luz</span>
+        <span class="value" id="val-luz">--</span>
+        <div class="bar"><div class="bar-fill" id="bar-luz"></div></div>
+        <span class="countdown hidden" id="countdown-luz"></span>
+      </div>
+      <div class="sensor-card" id="card-solo">
+        <span class="icon">&#127807;</span>
+        <span class="label">Umidade do solo</span>
+        <span class="value" id="val-solo">--</span>
+        <div class="bar"><div class="bar-fill" id="bar-solo"></div></div>
+        <span class="countdown hidden" id="countdown-solo"></span>
+        <span class="ultima-rega hidden" id="ultima-rega"></span>
+      </div>
+      <div class="sensor-card" id="card-temp">
+        <span class="icon">&#127777;&#65039;</span>
+        <span class="label">Temperatura</span>
+        <span class="value" id="val-temp">--</span>
+        <div class="bar"><div class="bar-fill" id="bar-temp"></div></div>
+      </div>
+    </section>
+
+    <p id="footer-note">Atualiza a cada 2 segundos &middot; ultima leitura: <span id="last-update">--</span></p>
+  </main>
+
+  <script>
+    window.MOOD_LABELS = {{ mood_labels | tojson }};
+    window.MOOD_BG = {{ mood_bg | tojson }};
+    window.TRANSITION_MS = {{ transition_ms }};
+    window.TRANSITION_FRAMES = {{ transition_frames }};
+    window.FRAME_MS = {{ frame_ms }};
+  </script>
+  <script src="{{ url_for('static', filename='js/app.js') }}?v=19"></script>
+</body>
+</html>

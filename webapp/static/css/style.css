@@ -1,0 +1,337 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background-color: #ffffff;
+  color: #2b3a2f;
+  min-height: 100vh;
+  /* fundo branco fixo: somente a imagem do bichinho muda entre os moods. */
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  background: transparent;
+  color: #2b3a2f;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+#badges {
+  display: flex;
+  gap: 8px;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.badge.offline {
+  background: #b94f4f;
+}
+
+.badge.online {
+  background: #2f7d3c;
+}
+
+.badge.sim {
+  background: #c98a2c;
+}
+
+.hidden {
+  display: none;
+}
+
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pet-card {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin-top: 8px;
+  text-align: center;
+  width: 100%;
+}
+
+.pet-card img {
+  width: min(70vw, 420px);
+  height: min(70vw, 420px);
+  image-rendering: -webkit-optimize-contrast;
+}
+
+#mood-label {
+  margin-top: 4px;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #3f8d52;
+}
+
+.sensors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 28px;
+  width: 100%;
+  max-width: 560px;
+}
+
+.sensor-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sensor-card .icon {
+  font-size: 1.6rem;
+}
+
+.sensor-card .label {
+  font-size: 0.8rem;
+  color: #6a7c6d;
+}
+
+.sensor-card .value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2b3a2f;
+}
+
+.bar {
+  width: 100%;
+  height: 8px;
+  background: #e3e8e3;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: #4fa861;
+  transition: width 0.5s ease, background-color 0.4s ease;
+}
+
+.countdown {
+  margin-top: 2px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #b94f4f;
+}
+
+.countdown.critico {
+  color: #7a1f1f;
+}
+
+.ultima-rega {
+  margin-top: 2px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #3f8d52;
+}
+
+#footer-note {
+  margin-top: 22px;
+  font-size: 0.8rem;
+  color: #7a8a7d;
+}
+
+/* --- Botao de engrenagem (header) --- */
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 8px;
+  color: #2b3a2f;
+}
+
+.icon-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* --- Modal de configuracoes --- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 30, 24, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+/* especificidade maior que ".hidden" sozinho, pra garantir que o overlay
+   fique escondido quando tiver as duas classes (resolve empate de cascata
+   com a regra ".hidden" la em cima, que senao perderia por ordem no arquivo) */
+.overlay.hidden {
+  display: none;
+}
+
+.config-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: min(520px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 22px 24px 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
+.config-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.config-modal-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #2b3a2f;
+}
+
+.config-modal-header .icon-btn {
+  font-size: 1.5rem;
+}
+
+.config-modal-intro {
+  margin: 6px 0 16px;
+  font-size: 0.85rem;
+  color: #6a7c6d;
+  line-height: 1.4;
+}
+
+.config-error {
+  background: #fbeaea;
+  color: #7a1f1f;
+  border: 1px solid #d9534f;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  margin-bottom: 14px;
+}
+
+#config-form fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 18px;
+}
+
+#config-form legend {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #3f8d52;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+.config-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  color: #2b3a2f;
+}
+
+.config-field span {
+  flex: 1;
+}
+
+.config-field input {
+  width: 100px;
+  flex-shrink: 0;
+  padding: 6px 8px;
+  border: 1px solid #d8d2bd;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.config-field input:focus {
+  outline: 2px solid #4fa861;
+  outline-offset: 1px;
+}
+
+.config-field input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f2f0e6;
+}
+
+/* Radio/checkbox nao devem herdar a largura/borda dos campos numericos -
+   senao o "botaozinho" de radio fica esmagado dentro de uma caixa de 100px
+   com borda, parecendo um campo de texto quebrado. */
+.config-field input[type="radio"],
+.config-field input[type="checkbox"] {
+  width: auto;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  accent-color: #2f7d3c;
+}
+
+.config-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.btn {
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #2f7d3c;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #266531;
+}
+
+.btn-secondary {
+  background: #eceee9;
+  color: #2b3a2f;
+}
+
+.btn-secondary:hover {
+  background: #e0e3dc;
+}
