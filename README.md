@@ -271,24 +271,6 @@ stateDiagram-v2
         Oculos --> escolha: nova leitura
         Feliz --> escolha: nova leitura
     }
-
-    Ambiente --> Critico: seca > 24h OU dormindo > 1h\nOU temp >= 40°C OU temp <= 10°C
-    Critico --> Ambiente: humor recalculado = Feliz\nou Aproveitando o sol
-
-    Ambiente --> Festa: botao pressionado no Arduino
-    Critico --> Festa: botao pressionado no Arduino
-    Festa --> Ambiente: musica finalizada\nou interrompida
-
-    state "Critico - LED porta 10 + alarme buzzer\n(exibido na tela como Doente)" as Critico
-    state "Festa - vence qualquer outro estado" as Festa
-
-    note right of Critico
-        Independe do humor ambiental atual.
-        So desarma quando o humor recalculado
-        virar Feliz ou Aproveitando o sol -
-        mesmo que a causa original (seca,
-        frio ou calor extremo) ja tenha passado.
-    end note
 ```
 
 ### Diagrama de sequência
@@ -315,24 +297,3 @@ sequenceDiagram
         P-->>N: JSON { mood, luz, solo, temperatura,\ncritico, seca_restante_s, ... }
         N->>N: troca gif/frame, barras,\ncontadores e badges
     end
-
-    rect rgb(240, 240, 240)
-    Note over A,N: Modo festa
-    A->>A: botao pressionado (debounce 30ms)
-    A->>P: ">> Tocando musica!"
-    P->>P: state.set_festa(True) -> mood = "festa"
-    A->>A: tocarMusica()\n(interrompivel pelo botao)
-    A->>P: ">> Musica finalizada!" ou "interrompida!"
-    P->>P: state.set_festa(False)
-    end
-
-    rect rgb(250, 235, 235)
-    Note over A,N: Estado critico
-    P->>P: seca_since/dormindo_since/temp\nexcede limiar -> critico = True
-    P->>A: "CRITICO:1\n"
-    A->>A: liga LED porta 10 +\nbuzzer intermitente (250ms)
-    P->>P: humor recalculado = Feliz/Oculos\n-> critico = False
-    P->>A: "CRITICO:0\n"
-    A->>A: desliga LED + buzzer
-    end
-```
