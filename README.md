@@ -253,8 +253,8 @@ humor vale fica assim. Ela é decidida no `serial_reader.py`, que junta o
 ```mermaid
 stateDiagram-v2
     [*] --> Ambiente
-
     state "Humor ambiental (mood.py) - recalculado a cada leitura (2s)" as Ambiente {
+        direction LR
         state escolha <<choice>>
         [*] --> escolha
         escolha --> Dormindo: luz <= 400
@@ -263,13 +263,12 @@ stateDiagram-v2
         escolha --> Seca: solo < 250
         escolha --> Oculos: luz >= 800
         escolha --> Feliz: nenhuma condicao acima
-
-        Dormindo --> escolha: nova leitura
-        Frio --> escolha: nova leitura
-        Doente --> escolha: nova leitura
-        Seca --> escolha: nova leitura
-        Oculos --> escolha: nova leitura
-        Feliz --> escolha: nova leitura
+        Dormindo --> escolha
+        Frio --> escolha
+        Doente --> escolha
+        Seca --> escolha
+        Oculos --> escolha
+        Feliz --> escolha
     }
 ```
 
