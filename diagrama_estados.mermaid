@@ -1,0 +1,38 @@
+stateDiagram-v2
+    [*] --> Ambiente
+
+    state "Humor ambiental (mood.py) - recalculado a cada leitura (2s)" as Ambiente {
+        state escolha <<choice>>
+        [*] --> escolha
+        escolha --> Dormindo: luz <= 400
+        escolha --> Frio: luz > 400 e temp <= 15°C
+        escolha --> Doente: temp >= 40°C
+        escolha --> Seca: solo < 250
+        escolha --> Oculos: luz >= 800
+        escolha --> Feliz: nenhuma condicao acima
+
+        Dormindo --> escolha: nova leitura
+        Frio --> escolha: nova leitura
+        Doente --> escolha: nova leitura
+        Seca --> escolha: nova leitura
+        Oculos --> escolha: nova leitura
+        Feliz --> escolha: nova leitura
+    }
+
+    Ambiente --> Critico: seca > 24h OU dormindo > 1h\nOU temp >= 40°C OU temp <= 10°C
+    Critico --> Ambiente: humor recalculado = Feliz\nou Aproveitando o sol
+
+    Ambiente --> Festa: botao pressionado no Arduino
+    Critico --> Festa: botao pressionado no Arduino
+    Festa --> Ambiente: musica finalizada\nou interrompida
+
+    state "Critico - LED porta 10 + alarme buzzer\n(exibido na tela como Doente)" as Critico
+    state "Festa - vence qualquer outro estado" as Festa
+
+    note right of Critico
+        Independe do humor ambiental atual.
+        So desarma quando o humor recalculado
+        virar Feliz ou Aproveitando o sol -
+        mesmo que a causa original (seca,
+        frio ou calor extremo) ja tenha passado.
+    end note

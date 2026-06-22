@@ -1,0 +1,41 @@
+sequenceDiagram
+    participant A as Arduino (.ino)
+    participant P as App Python (Flask)
+    participant N as Navegador
+
+    Note over A,P: Serial USB, 9600 baud, texto plano, bidirecional
+
+    loop A cada 2s
+        A->>P: "Luz: 612 | Solo: 188 | Temperatura: 23.40 *C"
+        P->>P: parse via regex + compute_mood()
+        opt humor mudou desde a ultima leitura
+            P->>A: "MOOD:<humor>\n"
+            A->>A: atualizarLedsStatus()\n(verde/amarelo/vermelho)
+        end
+    end
+
+    loop A cada 2s
+        N->>P: GET /api/state
+        P-->>N: JSON { mood, luz, solo, temperatura,\ncritico, seca_restante_s, ... }
+        N->>N: troca gif/frame, barras,\ncontadores e badges
+    end
+
+    rect rgb(240, 240, 240)
+    Note over A,N: Modo festa
+    A->>A: botao pressionado (debounce 30ms)
+    A->>P: ">> Tocando musica!"
+    P->>P: state.set_festa(True) -> mood = "festa"
+    A->>A: tocarMusica()\n(interrompivel pelo botao)
+    A->>P: ">> Musica finalizada!" ou "interrompida!"
+    P->>P: state.set_festa(False)
+    end
+
+    rect rgb(250, 235, 235)
+    Note over A,N: Estado critico
+    P->>P: seca_since/dormindo_since/temp\nexcede limiar -> critico = True
+    P->>A: "CRITICO:1\n"
+    A->>A: liga LED porta 10 +\nbuzzer intermitente (250ms)
+    P->>P: humor recalculado = Feliz/Oculos\n-> critico = False
+    P->>A: "CRITICO:0\n"
+    A->>A: desliga LED + buzzer
+    end

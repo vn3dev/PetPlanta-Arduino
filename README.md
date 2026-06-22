@@ -245,3 +245,94 @@ humor vale fica assim. Ela é decidida no `serial_reader.py`, que junta o
 6. **Seca**, solo seco.
 7. **Aproveitando o sol**: luz forte, sem nenhum problema acima.
 8. **Feliz**: nada de especial.
+
+## Diagramas
+
+### Diagrama de estados
+
+```mermaid
+stateDiagram-v2
+    [*] --> Ambiente
+
+    state "Humor ambiental (mood.py) - recalculado a cada leitura (2s)" as Ambiente {
+        state escolha <<choice>>
+        [*] --> escolha
+        escolha --> Dormindo: luz <= 400
+        escolha --> Frio: luz > 400 e temp <= 15°C
+        escolha --> Doente: temp >= 40°C
+        escolha --> Seca: solo < 250
+        escolha --> Oculos: luz >= 800
+        escolha --> Feliz: nenhuma condicao acima
+
+        Dormindo --> escolha: nova leitura
+        Frio --> escolha: nova leitura
+        Doente --> escolha: nova leitura
+        Seca --> escolha: nova leitura
+        Oculos --> escolha: nova leitura
+        Feliz --> escolha: nova leitura
+    }
+
+    Ambiente --> Critico: seca > 24h OU dormindo > 1h\nOU temp >= 40°C OU temp <= 10°C
+    Critico --> Ambiente: humor recalculado = Feliz\nou Aproveitando o sol
+
+    Ambiente --> Festa: botao pressionado no Arduino
+    Critico --> Festa: botao pressionado no Arduino
+    Festa --> Ambiente: musica finalizada\nou interrompida
+
+    state "Critico - LED porta 10 + alarme buzzer\n(exibido na tela como Doente)" as Critico
+    state "Festa - vence qualquer outro estado" as Festa
+
+    note right of Critico
+        Independe do humor ambiental atual.
+        So desarma quando o humor recalculado
+        virar Feliz ou Aproveitando o sol -
+        mesmo que a causa original (seca,
+        frio ou calor extremo) ja tenha passado.
+    end note
+```
+
+### Diagrama de sequência
+
+```mermaid
+sequenceDiagram
+    participant A as Arduino (.ino)
+    participant P as App Python (Flask)
+    participant N as Navegador
+
+    Note over A,P: Serial USB, 9600 baud, texto plano, bidirecional
+
+    loop A cada 2s
+        A->>P: "Luz: 612 | Solo: 188 | Temperatura: 23.40 *C"
+        P->>P: parse via regex + compute_mood()
+        opt humor mudou desde a ultima leitura
+            P->>A: "MOOD:<humor>\n"
+            A->>A: atualizarLedsStatus()\n(verde/amarelo/vermelho)
+        end
+    end
+
+    loop A cada 2s
+        N->>P: GET /api/state
+        P-->>N: JSON { mood, luz, solo, temperatura,\ncritico, seca_restante_s, ... }
+        N->>N: troca gif/frame, barras,\ncontadores e badges
+    end
+
+    rect rgb(240, 240, 240)
+    Note over A,N: Modo festa
+    A->>A: botao pressionado (debounce 30ms)
+    A->>P: ">> Tocando musica!"
+    P->>P: state.set_festa(True) -> mood = "festa"
+    A->>A: tocarMusica()\n(interrompivel pelo botao)
+    A->>P: ">> Musica finalizada!" ou "interrompida!"
+    P->>P: state.set_festa(False)
+    end
+
+    rect rgb(250, 235, 235)
+    Note over A,N: Estado critico
+    P->>P: seca_since/dormindo_since/temp\nexcede limiar -> critico = True
+    P->>A: "CRITICO:1\n"
+    A->>A: liga LED porta 10 +\nbuzzer intermitente (250ms)
+    P->>P: humor recalculado = Feliz/Oculos\n-> critico = False
+    P->>A: "CRITICO:0\n"
+    A->>A: desliga LED + buzzer
+    end
+```
